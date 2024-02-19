@@ -13,7 +13,7 @@ HOST = os.getenv('JOYSTICKTV_HOST')
 CLIENT_ID = os.getenv('JOYSTICKTV_CLIENT_ID')
 CLIENT_SECRET = os.getenv('JOYSTICKTV_CLIENT_SECRET')
 WS_HOST = os.getenv('JOYSTICKTV_API_HOST')
-ACCESS_TOKEN = base64.b64encode(str(JOYSTICKTV_CLIENT_ID + ":" + JOYSTICKTV_CLIENT_SECRET).encode('ascii')).decode()
+ACCESS_TOKEN = base64.b64encode(str(CLIENT_ID + ":" + CLIENT_SECRET).encode('ascii')).decode()
 GATEWAY_IDENTIFIER = '{"channel":"GatewayChannel"}'
 
 URL = "{}?token={}".format(WS_HOST, ACCESS_TOKEN)
@@ -21,6 +21,7 @@ URL = "{}?token={}".format(WS_HOST, ACCESS_TOKEN)
 connected = False
 
 def on_message(ws, message):
+    global connected
     recieved_message = json.loads(message)
 
     if recieved_message["type"] == "reject_subscription":
@@ -56,7 +57,7 @@ def Home():
 @app.route("/install")
 def Install():
     state = "abcflask123"
-    return (flask.redirect(JOYSTICKTV_HOST + "/api/oauth/authorize?client_id=" + JOYSTICKTV_CLIENT_ID + "&scope=bot&state=" + state,code=302))
+    return (flask.redirect(HOST + "/api/oauth/authorize?client_id=" + CLIENT_ID + "&scope=bot&state=" + state,code=302))
 
 @app.route("/callback")
 def Callback():
@@ -68,7 +69,7 @@ def Callback():
 
     params = {'redirect_uri' : "/unused",'code' : code,'grant_type' : "authorization_code"}
     headers = {'Authorization' : "Basic {}".format(ACCESS_TOKEN), 'Content-Type' : 'application/json'}
-    req = requests.request('POST', JOYSTICKTV_HOST + "/api/oauth/token",params=params,headers=headers,data="")
+    req = requests.request('POST', HOST + "/api/oauth/token",params=params,headers=headers,data="")
 
     # Save to your DB if you need to request user data
     print(req.json()["access_token"])
