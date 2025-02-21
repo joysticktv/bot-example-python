@@ -24,17 +24,21 @@ def on_message(ws, message):
     global connected
     recieved_message = json.loads(message)
 
-    if recieved_message["type"] == "reject_subscription":
-        print('nope... no connection for you')
-    elif recieved_message["type"] == "confirm_subscription":
-        connected = True
-
-    if connected:
-        bot.Bot.handle_messages(ws, recieved_message)
-
+    if 'type' in recieved_message:
+        if recieved_message["type"] == "reject_subscription":
+            print('nope... no connection for you')
+            return
+        elif recieved_message["type"] == "confirm_subscription":
+            connected = True
+            return
+        elif recieved_message["type"] == "ping":
+            return
+    else:
+        if connected:
+            bot.Bot.handle_messages(ws, recieved_message)
 
 def on_error(ws, error):
-    print(error)
+    print(f"Error: {error}")
 
 def on_close(ws, close_status_code, close_msg):
     print("connection has closed")
